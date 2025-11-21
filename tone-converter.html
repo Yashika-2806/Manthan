@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tone Converter - Transform Your Text</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        main {
+            padding: 2.5rem;
+        }
+
+        .input-section h2 {
+            color: #1e293b;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        #inputText {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            min-height: 120px;
+        }
+
+        #inputText:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: white;
+        }
+
+        .mode-selection {
+            margin: 2rem 0;
+        }
+
+        .mode-selection h3 {
+            color: #1e293b;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        .mode-btn {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .mode-btn:hover {
+            background: white;
+            border-color: #6366f1;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-color: #6366f1;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn .icon {
+            font-size: 2rem;
+        }
+
+        .convert-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .convert-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .convert-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .convert-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            margin-top: 3rem;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-section h2 {
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .result-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-card.highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            border-color: #6366f1;
+            border-width: 3px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .result-header h3 {
+            color: #1e293b;
+            font-size: 1.2rem;
+        }
+
+        .copy-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .copy-btn:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .result-text {
+            color: #1e293b;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            background: white;
+            padding: 1.2rem;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .alternative-suggestions {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alternative-suggestions h3 {
+            color: #1e293b;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .suggestion-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #6366f1;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateX(4px);
+        }
+
+        .suggestion-label {
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .suggestion-text {
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            animation: shake 0.5s ease-in-out;
+            font-weight: 600;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        footer {
+            background: #f8fafc;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+
+            .mode-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .mode-btn {
+                padding: 1rem;
+            }
+
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 AI Tone Converter</h1>
+            <p class="subtitle">Transform your text into different tones instantly</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <h2>Enter Your Text</h2>
+                <textarea 
+                    id="inputText" 
+                    placeholder="Type or paste your text here... (e.g., 'I need this report done today!')"
+                    rows="6"
+                ></textarea>
+                
+                <div class="mode-selection">
+                    <h3>Select Conversion Mode</h3>
+                    <div class="mode-buttons">
+                        <button class="mode-btn active" data-mode="polite">
+                            <span class="icon">🤝</span>
+                            Polite
+                        </button>
+                        <button class="mode-btn" data-mode="formal">
+                            <span class="icon">👔</span>
+                            Formal
+                        </button>
+                        <button class="mode-btn" data-mode="informal">
+                            <span class="icon">😊</span>
+                            Informal
+                        </button>
+                        <button class="mode-btn" data-mode="professional">
+                            <span class="icon">💼</span>
+                            Professional
+                        </button>
+                        <button class="mode-btn" data-mode="friendly">
+                            <span class="icon">🌟</span>
+                            Friendly
+                        </button>
+                        <button class="mode-btn" data-mode="neutral">
+                            <span class="icon">⚖️</span>
+                            Neutral
+                        </button>
+                    </div>
+                </div>
+
+                <button id="convertBtn" class="convert-btn">
+                    <span class="btn-text">Convert Text</span>
+                    <span class="loader hidden"></span>
+                </button>
+            </div>
+
+            <div class="results-section hidden" id="resultsSection">
+                <h2>✨ Converted Results</h2>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h3>Original Text</h3>
+                        <button class="copy-btn" onclick="copyText('originalText')">📋 Copy</button>
+                    </div>
+                    <div class="result-text" id="originalText"></div>
+                </div>
+
+                <div class="result-card highlight">
+                    <div class="result-header">
+                        <h3 id="convertedModeTitle">Converted Text (Polite)</h3>
+                        <button class="copy-btn" onclick="copyText('convertedText')">📋 Copy</button>
+                    </div>
+                    <div class="result-text" id="convertedText"></div>
+                </div>
+
+                <div class="alternative-suggestions">
+                    <h3>💡 Alternative Suggestions</h3>
+                    <div id="alternativeSuggestions"></div>
+                </div>
+            </div>
+
+            <div class="error-message hidden" id="errorMessage"></div>
+        </main>
+
+        <footer>
+            <p>🚀 Powered by AI • Works 100% in your browser • No data sent to servers</p>
+        </footer>
+    </div>
+
+    <script>
+        // Global state
+        let selectedMode = 'polite';
+
+        // DOM Elements
+        const inputText = document.getElementById('inputText');
+        const convertBtn = document.getElementById('convertBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const originalTextDiv = document.getElementById('originalText');
+        const convertedTextDiv = document.getElementById('convertedText');
+        const convertedModeTitle = document.getElementById('convertedModeTitle');
+        const alternativeSuggestions = document.getElementById('alternativeSuggestions');
+
+        // Mode selection
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedMode = btn.dataset.mode;
+            });
+        });
+
+        // Convert button
+        convertBtn.addEventListener('click', handleConvert);
+
+        // Enter key to convert
+        inputText.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                handleConvert();
+            }
+        });
+
+        // Handle text conversion
+        function handleConvert() {
+            const text = inputText.value.trim();
+            
+            if (!text) {
+                showError('Please enter some text to convert!');
+                return;
+            }
+
+            if (text.length < 3) {
+                showError('Please enter at least 3 characters!');
+                return;
+            }
+
+            hideError();
+            resultsSection.classList.add('hidden');
+            setLoadingState(true);
+
+            // Simulate processing delay
+            setTimeout(() => {
+                const result = convertText(text, selectedMode);
+                displayResults(result);
+                setLoadingState(false);
+            }, 500);
+        }
+
+        // Convert text logic
+        function convertText(text, mode) {
+            let converted = text;
+            let alternatives = [];
+
+            if (mode === 'polite') {
+                converted = makePolite(text);
+                alternatives = [
+                    { mode: 'Formal', text: makeFormal(text) },
+                    { mode: 'Professional', text: makeProfessional(text) }
+                ];
+            } else if (mode === 'formal') {
+                converted = makeFormal(text);
+                alternatives = [
+                    { mode: 'Professional', text: makeProfessional(text) },
+                    { mode: 'Polite', text: makePolite(text) }
+                ];
+            } else if (mode === 'informal') {
+                converted = makeInformal(text);
+                alternatives = [
+                    { mode: 'Friendly', text: makeFriendly(text) }
+                ];
+            } else if (mode === 'professional') {
+                converted = makeProfessional(text);
+                alternatives = [
+                    { mode: 'Formal', text: makeFormal(text) },
+                    { mode: 'Polite', text: makePolite(text) }
+                ];
+            } else if (mode === 'friendly') {
+                converted = makeFriendly(text);
+                alternatives = [
+                    { mode: 'Informal', text: makeInformal(text) }
+                ];
+            } else if (mode === 'neutral') {
+                converted = makeNeutral(text);
+                alternatives = [
+                    { mode: 'Formal', text: makeFormal(text) }
+                ];
+            }
+
+            return {
+                original: text,
+                converted: converted,
+                alternatives: alternatives,
+                mode: mode
+            };
+        }
+
+        // Conversion functions
+        function makePolite(text) {
+            let result = text;
+            result = result.replace(/\bneed\b/gi, 'would appreciate');
+            result = result.replace(/\bwant\b/gi, 'would like');
+            result = result.replace(/\bmust\b/gi, 'should');
+            result = result.replace(/\bhave to\b/gi, 'need to');
+            result = result.replace(/\bget\b/gi, 'receive');
+            result = result.replace(/\basap\b/gi, 'at your earliest convenience');
+            result = result.replace(/\bright now\b/gi, 'as soon as possible');
+            
+            if (text.split(' ').length > 5 && !hasGreeting(result)) {
+                result = 'I hope this message finds you well. ' + result;
+            }
+            if (text.split(' ').length > 8) {
+                result += ' Thank you for your consideration.';
+            }
+            return result;
+        }
+
+        function makeFormal(text) {
+            let result = text;
+            const contractions = {
+                "don't": "do not", "can't": "cannot", "won't": "will not",
+                "shouldn't": "should not", "wouldn't": "would not", "couldn't": "could not",
+                "isn't": "is not", "aren't": "are not", "wasn't": "was not",
+                "weren't": "were not", "hasn't": "has not", "haven't": "have not",
+                "hadn't": "had not", "doesn't": "does not", "didn't": "did not",
+                "i'm": "I am", "you're": "you are", "we're": "we are",
+                "they're": "they are", "it's": "it is", "that's": "that is",
+                "there's": "there is", "i've": "I have", "you've": "you have",
+                "we've": "we have", "they've": "they have", "i'll": "I will",
+                "you'll": "you will", "we'll": "we will", "they'll": "they will"
+            };
+            
+            for (let [informal, formal] of Object.entries(contractions)) {
+                const regex = new RegExp('\\b' + informal + '\\b', 'gi');
+                result = result.replace(regex, formal);
+            }
+            
+            result = result.replace(/\byeah\b/gi, 'yes');
+            result = result.replace(/\byep\b/gi, 'yes');
+            result = result.replace(/\bnope\b/gi, 'no');
+            result = result.replace(/\bgonna\b/gi, 'going to');
+            result = result.replace(/\bwanna\b/gi, 'want to');
+            result = result.replace(/\bgotta\b/gi, 'have to');
+            result = result.replace(/\bkinda\b/gi, 'kind of');
+            result = result.replace(/!+/g, '.');
+            
+            return result.charAt(0).toUpperCase() + result.slice(1);
+        }
+
+        function makeInformal(text) {
+            let result = text;
+            const contractions = {
+                "do not": "don't", "cannot": "can't", "will not": "won't",
+                "is not": "isn't", "are not": "aren't", "was not": "wasn't",
+                "I am": "I'm", "you are": "you're", "we are": "we're",
+                "it is": "it's", "I will": "I'll", "you will": "you'll"
+            };
+            
+            for (let [formal, informal] of Object.entries(contractions)) {
+                const regex = new RegExp('\\b' + formal + '\\b', 'gi');
+                result = result.replace(regex, informal);
+            }
+            
+            if (text.split(' ').length > 5 && !hasGreeting(result)) {
+                result = 'Hey! ' + result;
+            }
+            if (text.split(' ').length > 8) {
+                result += ' Cheers!';
+            }
+            return result;
+        }
+
+        function makeProfessional(text) {
+            let result = text;
+            result = result.replace(/\bthink\b/gi, 'believe');
+            result = result.replace(/\bneed\b/gi, 'require');
+            result = result.replace(/\bhelp\b/gi, 'assistance');
+            result = result.replace(/\bproblem\b/gi, 'issue');
+            result = result.replace(/\bfix\b/gi, 'resolve');
+            result = result.replace(/\bcheck\b/gi, 'review');
+            result = result.replace(/!+/g, '.');
+            
+            if (text.split(' ').length > 5 && !hasGreeting(result)) {
+                result = 'Regarding your inquiry, ' + result.toLowerCase();
+                result = result.charAt(0).toUpperCase() + result.slice(1);
+            }
+            return result;
+        }
+
+        function makeFriendly(text) {
+            let result = text;
+            
+            if (text.split(' ').length > 5 && !hasGreeting(result)) {
+                result = 'Hi there! ' + result;
+            }
+            
+            result = result.replace(/\b(I would|I will)\b/gi, "I'll");
+            result = result.replace(/\b(you would|you will)\b/gi, "you'll");
+            
+            if (text.split(' ').length > 8) {
+                result += ' Have a great day!';
+            }
+            return result;
+        }
+
+        function makeNeutral(text) {
+            let result = text;
+            result = result.replace(/!+/g, '.');
+            result = result.replace(/\?+/g, '?');
+            result = result.replace(/\b(Hey|Hi there|What's up)\b/gi, '');
+            result = result.replace(/\s+/g, ' ').trim();
+            return result;
+        }
+
+        function hasGreeting(text) {
+            const greetings = ['hello', 'hi', 'hey', 'dear', 'good morning', 'good afternoon'];
+            const lowerText = text.toLowerCase().substring(0, 50);
+            return greetings.some(greeting => lowerText.includes(greeting));
+        }
+
+        // Display results
+        function displayResults(data) {
+            originalTextDiv.textContent = data.original;
+            convertedTextDiv.textContent = data.converted;
+            convertedModeTitle.textContent = `Converted Text (${capitalizeFirst(data.mode)})`;
+
+            if (data.alternatives && data.alternatives.length > 0) {
+                alternativeSuggestions.innerHTML = data.alternatives.map(alt => `
+                    <div class="suggestion-item">
+                        <div class="suggestion-label">${alt.mode}</div>
+                        <div class="suggestion-text">${escapeHtml(alt.text)}</div>
+                    </div>
+                `).join('');
+            } else {
+                alternativeSuggestions.innerHTML = '<p style="color: #64748b;">No alternative suggestions available.</p>';
+            }
+
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Copy to clipboard
+        function copyText(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(() => {
+                showError('Failed to copy to clipboard');
+            });
+        }
+
+        // Show error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            setTimeout(() => hideError(), 5000);
+        }
+
+        // Hide error
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+
+        // Loading state
+        function setLoadingState(isLoading) {
+            const btnText = document.querySelector('.btn-text');
+            const loader = document.querySelector('.loader');
+            
+            if (isLoading) {
+                convertBtn.disabled = true;
+                btnText.textContent = 'Converting...';
+                loader.classList.remove('hidden');
+            } else {
+                convertBtn.disabled = false;
+                btnText.textContent = 'Convert Text';
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Utility functions
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

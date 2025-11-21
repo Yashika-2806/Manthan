@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tone Converter - AI Text Transformation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 AI Tone Converter</h1>
+            <p class="subtitle">Transform your text into different tones with AI-powered processing</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <h2>Enter Your Text</h2>
+                <textarea 
+                    id="inputText" 
+                    placeholder="Type or paste your text here... (e.g., 'I need this report done today!')"
+                    rows="6"
+                ></textarea>
+                
+                <div class="mode-selection">
+                    <h3>Select Conversion Mode</h3>
+                    <div class="mode-buttons">
+                        <button class="mode-btn active" data-mode="polite">
+                            <span class="icon">🤝</span>
+                            Polite
+                        </button>
+                        <button class="mode-btn" data-mode="formal">
+                            <span class="icon">👔</span>
+                            Formal
+                        </button>
+                        <button class="mode-btn" data-mode="informal">
+                            <span class="icon">😊</span>
+                            Informal
+                        </button>
+                        <button class="mode-btn" data-mode="professional">
+                            <span class="icon">💼</span>
+                            Professional
+                        </button>
+                        <button class="mode-btn" data-mode="friendly">
+                            <span class="icon">🌟</span>
+                            Friendly
+                        </button>
+                        <button class="mode-btn" data-mode="neutral">
+                            <span class="icon">⚖️</span>
+                            Neutral
+                        </button>
+                    </div>
+                </div>
+
+                <button id="convertBtn" class="convert-btn">
+                    <span class="btn-text">Convert Text</span>
+                    <span class="loader" style="display: none;"></span>
+                </button>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h2>Converted Results</h2>
+                <div class="result-card">
+                    <div class="result-header">
+                        <h3>Original Text</h3>
+                        <button class="copy-btn" data-target="originalText">📋 Copy</button>
+                    </div>
+                    <div class="result-text" id="originalText"></div>
+                </div>
+
+                <div class="result-card highlight">
+                    <div class="result-header">
+                        <h3 id="convertedModeTitle">Converted Text (Polite)</h3>
+                        <button class="copy-btn" data-target="convertedText">📋 Copy</button>
+                    </div>
+                    <div class="result-text" id="convertedText"></div>
+                </div>
+
+                <div class="alternative-suggestions">
+                    <h3>Alternative Suggestions</h3>
+                    <div id="alternativeSuggestions"></div>
+                </div>
+
+                <div class="dataset-info">
+                    <h4>🔍 Processing Details</h4>
+                    <div id="datasetInfo"></div>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage" style="display: none;"></div>
+        </main>
+
+        <footer>
+            <p>Powered by AI models trained on GYAFC, ParaNMT, Wikipedia Simple English, and Yelp Reviews datasets</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tone Converter - Standalone Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .mode-btn {
+            padding: 15px;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .convert-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+        
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .convert-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .result-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .result-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .result-text {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.6;
+            min-height: 60px;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 2px solid #667eea;
+        }
+        
+        .alternatives {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .alt-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .alt-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 AI Tone Converter</h1>
+        <p class="subtitle">Advanced NLP-powered text transformation system</p>
+        
+        <div id="error" class="error"></div>
+        
+        <textarea id="inputText" rows="5" placeholder="Enter your text here... (e.g., 'I need this done now')"></textarea>
+        
+        <div class="mode-buttons">
+            <button class="mode-btn active" data-mode="polite">🤝 Polite</button>
+            <button class="mode-btn" data-mode="formal">👔 Formal</button>
+            <button class="mode-btn" data-mode="informal">😊 Informal</button>
+            <button class="mode-btn" data-mode="professional">💼 Professional</button>
+            <button class="mode-btn" data-mode="friendly">🌟 Friendly</button>
+            <button class="mode-btn" data-mode="neutral">⚖️ Neutral</button>
+        </div>
+        
+        <button id="convertBtn" class="convert-btn">
+            <span id="btnText">Convert Text</span>
+            <span id="loader" class="loader" style="display: none;"></span>
+        </button>
+        
+        <div id="results" class="results">
+            <div class="result-card">
+                <h3>Original Text</h3>
+                <div class="result-text" id="originalText"></div>
+            </div>
+            
+            <div class="result-card highlight">
+                <h3 id="convertedTitle">Converted Text</h3>
+                <div class="result-text" id="convertedText"></div>
+            </div>
+            
+            <div class="alternatives">
+                <h3>Alternative Suggestions</h3>
+                <div id="alternativesContainer"></div>
+            </div>
+            
+            <div class="info">
+                <h4>🔍 Processing Details</h4>
+                <div id="processingInfo"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedMode = 'polite';
+        
+        // Mode selection
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedMode = btn.dataset.mode;
+            });
+        });
+        
+        // Convert button
+        document.getElementById('convertBtn').addEventListener('click', async () => {
+            const text = document.getElementById('inputText').value.trim();
+            const error = document.getElementById('error');
+            const results = document.getElementById('results');
+            const btn = document.getElementById('convertBtn');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            
+            // Validation
+            error.style.display = 'none';
+            if (!text) {
+                error.textContent = 'Please enter some text!';
+                error.style.display = 'block';
+                return;
+            }
+            
+            if (text.length < 3) {
+                error.textContent = 'Text must be at least 3 characters!';
+                error.style.display = 'block';
+                return;
+            }
+            
+            // Loading state
+            btn.disabled = true;
+            btnText.textContent = 'Converting...';
+            loader.style.display = 'inline-block';
+            results.style.display = 'none';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/convert', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text, mode: selectedMode})
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Display results
+                document.getElementById('originalText').textContent = data.original_text;
+                document.getElementById('convertedText').textContent = data.converted_text;
+                document.getElementById('convertedTitle').textContent = `Converted Text (${selectedMode.charAt(0).toUpperCase() + selectedMode.slice(1)})`;
+                
+                // Alternatives
+                const altContainer = document.getElementById('alternativesContainer');
+                if (data.alternatives && data.alternatives.length > 0) {
+                    altContainer.innerHTML = data.alternatives.map(alt => `
+                        <div class="alt-item">
+                            <div class="alt-label">${alt.mode}</div>
+                            <div>${alt.text}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    altContainer.innerHTML = '<p>No alternative suggestions available</p>';
+                }
+                
+                // Processing info
+                const info = data.dataset_info;
+                const notes = info.notes || [];
+                document.getElementById('processingInfo').innerHTML = `
+                    <strong>Model:</strong> ${info.model}<br>
+                    <strong>Datasets:</strong> ${info.datasets.join(', ')}<br>
+                    <strong>Processing Time:</strong> ${info.processing_time}<br>
+                    <strong>Confidence:</strong> ${info.confidence}<br>
+                    <strong>Sentiment:</strong> ${info.sentiment}<br>
+                    <strong>Complexity:</strong> ${info.complexity}<br>
+                    ${notes.length > 0 ? '<br><strong>Notes:</strong><br>' + notes.map(n => '• ' + n).join('<br>') : ''}
+                `;
+                
+                results.style.display = 'block';
+                results.scrollIntoView({behavior: 'smooth'});
+                
+            } catch (err) {
+                error.textContent = `Error: ${err.message}. Make sure the server is running on localhost:5000`;
+                error.style.display = 'block';
+                console.error('Error:', err);
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Convert Text';
+                loader.style.display = 'none';
+            }
+        });
+        
+        // Enter key support
+        document.getElementById('inputText').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                document.getElementById('convertBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
