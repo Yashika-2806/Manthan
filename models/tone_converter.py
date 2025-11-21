@@ -16,12 +16,14 @@ import random
 from typing import Dict, List, Tuple
 from collections import defaultdict
 import time
+from models.dataset_loader import DatasetLoader
 
 
 class ToneConverter:
     """
     Advanced Tone Conversion Model using NLP and Machine Learning principles
     Supports 6 conversion modes with intelligent context-aware transformations
+    NOW LOADS ACTUAL DATASETS: GYAFC, ParaNMT, Wikipedia, Yelp
     """
     
     def __init__(self):
@@ -29,14 +31,22 @@ class ToneConverter:
         self.loaded = False
         self.conversion_history = []
         self.word_frequencies = defaultdict(int)
-        self.model_version = "2.0-NLP-Enhanced"
+        self.model_version = "2.1-Dataset-Integrated"
+        
+        # Load actual datasets from files
+        print("🔄 Initializing with real datasets...")
+        self.dataset_loader = DatasetLoader()
+        self.datasets_loaded = self.dataset_loader.load_all_datasets()
+        
         self._load_resources()
         self._initialize_nlp_models()
         
     def _load_resources(self):
-        """Load conversion rules and linguistic pattern databases"""
+        """Load conversion rules from ACTUAL dataset files"""
         
-        # GYAFC-inspired politeness patterns
+        # Load GYAFC politeness patterns from dataset file
+        gyafc_patterns = self.dataset_loader.get_gyafc_patterns()
+        
         self.polite_patterns = {
             'please_additions': [
                 (r'\b(can|could|would)\s+you\b', r'\1 you please'),
@@ -58,22 +68,27 @@ class ToneConverter:
                 'quick': 'prompt',
                 'fast': 'expedited',
             },
-            'greetings': [
+            'greetings': gyafc_patterns.get('greetings', [
                 'I hope this message finds you well. ',
                 'I trust this finds you in good health. ',
-                'I hope you are doing well. ',
-            ],
-            'closings': [
+            ]),
+            'closings': gyafc_patterns.get('closings', [
                 ' Thank you for your time and consideration.',
                 ' I appreciate your assistance with this matter.',
-                ' Thank you for your attention to this.',
-                ' I am grateful for your help.',
-            ]
+            ])
         }
         
-        # Wikipedia-style formal patterns
+        # Load Wikipedia formal patterns from dataset file
+        wiki_contractions = self.dataset_loader.get_wikipedia_contractions()
+        wiki_formal = self.dataset_loader.get_wikipedia_formal_words()
+        
+        # Wikipedia-style formal patterns (loaded from dataset)
+        contraction_dict = {}
+        for item in wiki_contractions:
+            contraction_dict[item['informal']] = item['formal']
+        
         self.formal_patterns = {
-            'contractions': {
+            'contractions': contraction_dict or {
                 "don't": "do not", "can't": "cannot", "won't": "will not",
                 "shouldn't": "should not", "wouldn't": "would not", "couldn't": "could not",
                 "isn't": "is not", "aren't": "are not", "wasn't": "was not",
@@ -86,7 +101,7 @@ class ToneConverter:
                 "you'll": "you will", "we'll": "we will", "they'll": "they will",
                 "he's": "he is", "she's": "she is", "who's": "who is",
             },
-            'informal_to_formal': {
+            'informal_to_formal': {item['informal']: item['formal'] for item in wiki_formal} or {
                 'yeah': 'yes', 'yep': 'yes', 'nope': 'no', 'nah': 'no',
                 'gonna': 'going to', 'wanna': 'want to', 'gotta': 'have to',
                 'kinda': 'kind of', 'sorta': 'sort of', 'dunno': 'do not know',
@@ -99,35 +114,38 @@ class ToneConverter:
             }
         }
         
-        # Yelp-inspired casual patterns
+        # Load Yelp casual patterns from dataset file
+        yelp_greetings = self.dataset_loader.get_yelp_greetings()
+        yelp_closings = self.dataset_loader.get_yelp_closings()
+        
+        # Yelp-inspired casual patterns (loaded from dataset)
         self.informal_patterns = {
             'contractions': {v: k for k, v in self.formal_patterns['contractions'].items()},
-            'casual_expressions': [
+            'casual_expressions': yelp_greetings or [
                 'Hey there!',
                 'Hi!',
                 'Hello!',
-                'Hey!',
-                'Hi there!',
             ],
-            'friendly_closings': [
+            'friendly_closings': yelp_closings or [
                 'Cheers!',
                 'Take care!',
                 'Have a great day!',
-                'Best!',
-                'Talk soon!',
             ]
         }
         
-        # ParaNMT-inspired professional patterns
+        # Load ParaNMT professional patterns from dataset file
+        paranmt_vocab = self.dataset_loader.get_paranmt_vocabulary()
+        paranmt_prefixes = self.dataset_loader.get_paranmt_prefixes()
+        
+        # ParaNMT-inspired professional patterns (loaded from dataset)
+        professional_replacements = {item['casual']: item['professional'] for item in paranmt_vocab}
+        
         self.professional_patterns = {
-            'prefixes': [
+            'prefixes': paranmt_prefixes or [
                 'With respect to your inquiry, ',
                 'Regarding your request, ',
-                'In response to your message, ',
-                'Concerning your question, ',
-                'With reference to your communication, ',
             ],
-            'replacements': {
+            'replacements': professional_replacements or {
                 'think': 'believe',
                 'need': 'require',
                 'help': 'assistance',
@@ -148,7 +166,19 @@ class ToneConverter:
         }
         
         self.loaded = True
-        print(f"[Model {self.model_version}] Initialized with 500+ transformation rules across 4 datasets")
+        
+        # Show dataset statistics
+        if self.datasets_loaded:
+            stats = self.dataset_loader.get_dataset_stats()
+            total_patterns = sum([
+                stats['gyafc'].get('total_patterns', 0),
+                stats['paranmt'].get('vocabulary_size', 0),
+                stats['wikipedia'].get('total_rules', 0),
+                stats['yelp'].get('casual_patterns', 0)
+            ])
+            print(f"✅ [Model {self.model_version}] Loaded {stats['total_loaded']} datasets with {total_patterns} patterns")
+        else:
+            print(f"⚠️ [Model {self.model_version}] Using fallback patterns (datasets not loaded)")
         
     def _initialize_nlp_models(self):
         """Initialize NLP processing components for advanced analysis"""
@@ -308,11 +338,25 @@ class ToneConverter:
             'timestamp': time.time()
         })
         
+        # Get dataset info
+        datasets_info = []
+        if self.datasets_loaded:
+            stats = self.dataset_loader.get_dataset_stats()
+            datasets_info = [
+                f"GYAFC ({stats['gyafc'].get('total_patterns', 0)} patterns)",
+                f"ParaNMT ({stats['paranmt'].get('vocabulary_size', 0)} vocab)",
+                f"Wikipedia ({stats['wikipedia'].get('total_rules', 0)} rules)",
+                f"Yelp ({stats['yelp'].get('casual_patterns', 0)} patterns)"
+            ]
+        else:
+            datasets_info = ['GYAFC', 'ParaNMT', 'Wikipedia', 'Yelp']
+        
         return {
             'converted_text': converted,
             'alternatives': alternatives,
             'model': f'Advanced Tone Converter v{self.model_version}',
-            'datasets_used': ['GYAFC', 'ParaNMT', 'Wikipedia Simple English', 'Yelp Reviews'],
+            'datasets_used': datasets_info,
+            'datasets_loaded_from_files': self.datasets_loaded,
             'confidence': self._calculate_confidence(text, converted),
             'analysis': {
                 'original_sentiment': sentiment,
