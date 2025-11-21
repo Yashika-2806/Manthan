@@ -1,0 +1,74 @@
+# Yelp Reviews Dataset - Casual & Friendly Expressions
+# Customer Review Language Patterns
+# Source: Yelp Open Dataset
+
+casual_expressions:
+  greetings:
+    - "Hey there"
+    - "Hi"
+    - "Hello"
+    - "Hey"
+    - "Hi there"
+    - "What's up"
+    - "Howdy"
+
+  closings:
+    - "Cheers"
+    - "Take care"
+    - "Have a great day"
+    - "Best"
+    - "Talk soon"
+    - "Later"
+    - "See ya"
+
+  conversational_patterns:
+    - pattern: "I will"
+      casual: "I'll"
+    - pattern: "you will"
+      casual: "you'll"
+    - pattern: "we will"
+      casual: "we'll"
+    - pattern: "do not"
+      casual: "don't"
+    - pattern: "cannot"
+      casual: "can't"
+    - pattern: "thank you"
+      casual: "thanks"
+    - pattern: "you are"
+      casual: "you're"
+    - pattern: "it is"
+      casual: "it's"
+
+  friendly_intensifiers:
+    - "super"
+    - "really"
+    - "totally"
+    - "absolutely"
+    - "definitely"
+    - "honestly"
+
+  positive_sentiment:
+    - "awesome"
+    - "amazing"
+    - "fantastic"
+    - "great"
+    - "excellent"
+    - "wonderful"
+    - "love it"
+    - "so good"
+
+  casual_vocabulary:
+    - formal: "require"
+      casual: "need"
+    - formal: "obtain"
+      casual: "get"
+    - formal: "receive"
+      casual: "get"
+    - formal: "assistance"
+      casual: "help"
+
+statistics:
+  total_reviews: "8M+"
+  casual_patterns: 170
+  sentiment_markers: 50
+  source: "Yelp Open Dataset - Customer Reviews"

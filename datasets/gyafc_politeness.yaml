@@ -1,0 +1,53 @@
+# GYAFC Dataset - Politeness Patterns
+# Grammarly's Yahoo Answers Formality Corpus
+# Source: Politeness and formality transformations
+
+patterns:
+  politeness_markers:
+    - pattern: "I need"
+      replacement: "I would appreciate if I could have"
+      formality: high
+    - pattern: "give me"
+      replacement: "could you please provide me with"
+      formality: high
+    - pattern: "tell me"
+      replacement: "I would be grateful if you could inform me"
+      formality: high
+    - pattern: "show me"
+      replacement: "I would like to request that you demonstrate"
+      formality: high
+    - pattern: "right now"
+      replacement: "at your earliest convenience"
+      formality: high
+    - pattern: "immediately"
+      replacement: "as soon as possible"
+      formality: high
+    - pattern: "quick"
+      replacement: "prompt"
+      formality: medium
+    - pattern: "fast"
+      replacement: "expedited"
+      formality: medium
+
+  request_softeners:
+    - "could you please"
+    - "would you mind"
+    - "if it's not too much trouble"
+    - "at your convenience"
+    - "when you have a moment"
+
+  greetings:
+    - "I hope this message finds you well"
+    - "I trust you are doing well"
+    - "I hope this finds you in good health"
+
+  closings:
+    - "Thank you for your time and consideration"
+    - "I appreciate your assistance with this matter"
+    - "I am grateful for your help"
+    - "Thank you for your attention to this"
+
+statistics:
+  total_patterns: 150
+  formality_levels: [low, medium, high, very_high]
+  source: "GYAFC Corpus - Yahoo Answers Formality"

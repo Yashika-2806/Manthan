@@ -366,6 +366,12 @@ class ToneConverter:
         for informal, formal in self.formal_patterns['informal_to_formal'].items():
             result = re.sub(r'\b' + re.escape(informal) + r'\b', formal, result, flags=re.IGNORECASE)
         
+        # Additional formal transformations for common words
+        result = re.sub(r'\bneed\b', 'require', result, flags=re.IGNORECASE)
+        result = re.sub(r'\bwant\b', 'wish to have', result, flags=re.IGNORECASE)
+        result = re.sub(r'\bget\b', 'obtain', result, flags=re.IGNORECASE)
+        result = re.sub(r'\btoday\b', 'today', result, flags=re.IGNORECASE)  # Keep but add period
+        
         # Remove excessive punctuation
         result = re.sub(r'!+', '.', result)
         result = re.sub(r'\?+', '?', result)
@@ -384,6 +390,10 @@ class ToneConverter:
                 capitalized.append(s)
         result = ''.join(capitalized)
         
+        # Ensure ends with period if no punctuation
+        if not result.endswith(('.', '!', '?')):
+            result += '.'
+        
         return result
     
     def _convert_to_informal(self, text: str, sentiment: str = 'neutral') -> str:
@@ -395,15 +405,19 @@ class ToneConverter:
             if len(informal) > 0:
                 result = re.sub(r'\b' + re.escape(formal) + r'\b', informal, result, flags=re.IGNORECASE)
         
-        # Add casual greeting
-        if len(result.split()) > 5 and not self._has_greeting(result):
+        # Make text more casual
+        result = re.sub(r'\brequire\b', 'need', result, flags=re.IGNORECASE)
+        result = re.sub(r'\bobtain\b', 'get', result, flags=re.IGNORECASE)
+        result = re.sub(r'\breceive\b', 'get', result, flags=re.IGNORECASE)
+        
+        # Add casual greeting (always for conversational tone)
+        if not self._has_greeting(result):
             result = random.choice(self.informal_patterns['casual_expressions']) + ' ' + result
         
         # Add friendly closing
-        if len(result.split()) > 8:
-            if not result.endswith(('!', '?', '.')):
-                result += '!'
-            result += ' ' + random.choice(self.informal_patterns['friendly_closings'])
+        if not result.endswith(('!', '?', '.')):
+            result += '!'
+        result = result.rstrip('.!?') + '! ' + random.choice(self.informal_patterns['friendly_closings'])
         
         return result
     

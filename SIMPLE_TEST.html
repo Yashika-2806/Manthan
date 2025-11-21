@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SIMPLE TEST - Tone Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            display: none;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        h1 { color: #333; }
+        h3 { color: #666; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 SIMPLE API TEST</h1>
+        <p><strong>Server URL:</strong> <code>http://localhost:5000</code></p>
+        
+        <textarea id="input" rows="4" placeholder="Enter text (e.g., 'I need help now')">I need help with this task right now</textarea>
+        
+        <button onclick="testAPI()">🚀 TEST CONVERSION</button>
+        
+        <div id="result" class="result"></div>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const input = document.getElementById('input').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = '⏳ Testing API...';
+            
+            try {
+                console.log('Sending request to http://localhost:5000/api/convert');
+                
+                const response = await fetch('http://localhost:5000/api/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: input,
+                        mode: 'polite'
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                // Display results
+                let html = '<h3>✅ SUCCESS!</h3>';
+                html += '<p><strong>Original:</strong><br>' + data.original_text + '</p>';
+                html += '<p><strong>Converted (Polite):</strong><br>' + data.converted_text + '</p>';
+                
+                if (data.alternatives && data.alternatives.length > 0) {
+                    html += '<h3>Alternatives (' + data.alternatives.length + '):</h3>';
+                    data.alternatives.forEach(alt => {
+                        html += '<p><strong>' + alt.mode + ':</strong><br>' + alt.text + '</p>';
+                    });
+                } else {
+                    html += '<p style="color: red;">⚠️ No alternatives generated!</p>';
+                }
+                
+                html += '<h3>Processing Info:</h3>';
+                html += '<p>Model: ' + data.dataset_info.model + '</p>';
+                html += '<p>Confidence: ' + data.dataset_info.confidence + '</p>';
+                html += '<p>Time: ' + data.dataset_info.processing_time + '</p>';
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ ERROR</h3>
+                    <p><strong>Message:</strong> ${error.message}</p>
+                    <p><strong>Possible causes:</strong></p>
+                    <ul>
+                        <li>Server not running (run: <code>python app.py</code>)</li>
+                        <li>Server running on different port</li>
+                        <li>CORS issues</li>
+                        <li>Network/firewall blocking localhost</li>
+                    </ul>
+                    <p><strong>Check:</strong> Open <a href="http://localhost:5000" target="_blank">http://localhost:5000</a> in new tab</p>
+                `;
+            }
+        }
+        
+        // Auto-test on load
+        window.onload = function() {
+            console.log('Page loaded, ready to test!');
+            console.log('Click the button to test the API');
+        };
+    </script>
+</body>
+</html>

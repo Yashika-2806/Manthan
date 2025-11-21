@@ -118,5 +118,5 @@ if __name__ == '__main__':
     print(f"📊 Model Status: {'Loaded' if tone_converter.is_loaded() else 'Loading...'}")
     print("=" * 60)
     
-    # Run the Flask app
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Run the Flask app without auto-reloader to prevent crashes
+    app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False)
