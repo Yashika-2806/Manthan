@@ -247,6 +247,8 @@ Your AI Tone Converter is **COMPLETE** and **READY FOR SUBMISSION**!
 ✅ Comprehensive documentation  
 ✅ Multiple testing tools  
 ✅ Production-ready code  
+<img width="1222" height="733" alt="image" src="https://github.com/user-attachments/assets/a12311bb-76e5-405d-96b1-a57f36080169" />
+
 
 **Everything is working perfectly!** 🎉
 
